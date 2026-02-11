@@ -1,5 +1,7 @@
 # CrypteCipher
 
+**PR:** Initial scaffold and features added for review.
+
 Secure privacy-first multi-currency wallet (scaffold)
 
 Overview
