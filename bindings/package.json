@@ -1,0 +1,9 @@
+{
+  "name": "cryptec-bindings-tests",
+  "version": "0.1.0",
+  "scripts": {
+    "build-cli": "cargo build -p cryptec_cli --manifest-path ../tools/cli/Cargo.toml --release",
+    "test": "node test/test.js"
+  },
+  "devDependencies": {}
+}

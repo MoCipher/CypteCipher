@@ -1,0 +1,16 @@
+[package]
+name = "cryptec_bindings"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "cryptec_bindings"
+crate-type = ["cdylib"]
+
+[dependencies]
+# napi-rs provides Node.js native ABI bindings (useful for Electron desktop)
+napi = { version = "2", features = ["compat-mode"] }
+napi-derive = "2"
+
+# Depend on the core crate (path dependency)
+cryptec_core = { path = "../core" }
