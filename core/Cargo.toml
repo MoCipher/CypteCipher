@@ -25,8 +25,8 @@ bip32 = "0.3"
 # BDK for wallet abstractions (UTXO management, PSBT, descriptors)
 bdk = { version = "0.27", features = ["keys-bip39", "electrum", "sqlite"] }
 
-# Rust-Lightning (lightning protocol) - use as optional or for in-process nodes
-lightning = "0.0.124"
+# Rust-Lightning (lightning protocol) - add as an optional dependency when needed
+# lightning = { version = "0.0.124", optional = true }  # disabled because some versions may be yanked
 
 # Crypto / storage / tools
 argon2 = "0.4"

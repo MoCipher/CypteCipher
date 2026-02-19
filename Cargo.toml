@@ -1,0 +1,10 @@
+[workspace]
+members = [
+  "core",
+  "bindings",
+  "tools/cli"
+]
+
+[workspace.metadata]
+# Project metadata
+name = "cryptec-workspace"
