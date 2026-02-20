@@ -57,6 +57,7 @@ mod tests {
     use bitcoin::secp256k1::PublicKey as SecpPub;
     use secp256k1::SecretKey;
     use rand::rngs::OsRng;
+    use rand::RngCore;
 
     #[test]
     fn build_htlc_script_and_address() {
@@ -67,7 +68,7 @@ mod tests {
         let pk1 = SecpPub::from_secret_key(&secp, &sk1);
         let pk2 = SecpPub::from_secret_key(&secp, &sk2);
         let mut hash = [0u8;32];
-        OsRng.fill_bytes(&mut hash);
+        rng.fill_bytes(&mut hash);
         let script = build_htlc_redeem_script(&hash, &PublicKey{ key: pk1, compressed: true }, &PublicKey{ key: pk2, compressed: true }, 500);
         assert!(script.len() > 0);
     }
