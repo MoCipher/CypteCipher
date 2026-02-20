@@ -1,5 +1,7 @@
 # CrypteCipher
 
+## This just Testing, educational purposes only. this will be refrence to future projects.
+
 **PR:** Initial scaffold and features added for review.
 
 Secure privacy-first multi-currency wallet (scaffold)
