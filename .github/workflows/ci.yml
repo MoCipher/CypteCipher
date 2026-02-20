@@ -74,6 +74,10 @@ jobs:
           echo "=== Cargo.lock entries for key crates ===" > ci-diagnostics/cargo-lock-entries.txt
           grep -nE 'bdk|bip39|bip32|bitcoin|rusqlite|hidapi|aes-gcm|rusqlite' Cargo.lock >> ci-diagnostics/cargo-lock-entries.txt || true
 
+      - name: Run UniFFI codegen (if available)
+        run: |
+          ./scripts/uniffi_codegen.sh || true
+
       - name: Debug: cargo metadata & dependency tree
         run: |
           mkdir -p ci-diagnostics
