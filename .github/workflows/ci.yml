@@ -37,6 +37,38 @@ jobs:
           brew update || true
           brew install libusb pkg-config || true
 
+      - name: Debug: pkg-config & libusb (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          echo "=== PKG_CONFIG & libusb diagnostic ==="
+          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
+          which pkg-config || true
+          pkg-config --version || true
+          pkg-config --modversion libusb-1.0 || true
+          pkg-config --cflags --libs libusb-1.0 || true
+          echo "\nFiles under /usr/lib*/pkgconfig (matching libusb)"
+          ls -la /usr/lib*/pkgconfig | grep libusb || true
+          echo "\nList files from libusb-dev package (first 50 lines):"
+          dpkg -L libusb-1.0-0-dev | head -n 50 || true
+          echo "\nldconfig output for libusb (if available):"
+          ldconfig -p | grep libusb || true
+
+      - name: Debug: pkg-config & libusb (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          echo "=== PKG_CONFIG & libusb diagnostic (macOS) ==="
+          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
+          which pkg-config || true
+          pkg-config --version || true
+          pkg-config --modversion libusb-1.0 || true
+          ls -la /opt/homebrew/lib/pkgconfig /usr/local/lib/pkgconfig || true
+          brew list --versions libusb || true
+
+      - name: Debug: Cargo.lock (key deps)
+        run: |
+          echo "=== Cargo.lock entries for key crates ==="
+          grep -nE 'bdk|bip39|bip32|bitcoin|rusqlite|hidapi|aes-gcm|rusqlite' Cargo.lock || true
+
       - name: Build
         run: cargo build --workspace --verbose
       - name: Run Rust tests
