@@ -24,6 +24,19 @@ jobs:
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ matrix.rust }}
+
+      - name: Install system packages (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libusb-1.0-0-dev pkg-config libudev-dev
+
+      - name: Install system packages (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update || true
+          brew install libusb pkg-config || true
+
       - name: Build
         run: cargo build --workspace --verbose
       - name: Run Rust tests
