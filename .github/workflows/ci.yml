@@ -131,3 +131,10 @@ jobs:
           npm ci || true
           npm test
         shell: bash
+
+      - name: Run Electron smoke tests (desktop)
+        working-directory: ./electron
+        run: |
+          npm ci || true
+          npm test
+        shell: bash

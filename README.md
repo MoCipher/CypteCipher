@@ -1,5 +1,9 @@
 # CrypteCipher
 
+> Status: core library, Node bindings, CLI, CI, mobile (React Native scaffold), and desktop (Electron scaffold) are in-progress. Mobile uses a JS mock bridge; UniFFI scaffold is present for on-device bindings.
+
+# CrypteCipher
+
 **PR:** Initial scaffold and features added for review.
 
 Secure privacy-first multi-currency wallet (scaffold)
