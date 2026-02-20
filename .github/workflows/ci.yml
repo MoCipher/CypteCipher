@@ -71,6 +71,15 @@ jobs:
           echo "=== Cargo.lock entries for key crates ==="
           grep -nE 'bdk|bip39|bip32|bitcoin|rusqlite|hidapi|aes-gcm|rusqlite' Cargo.lock || true
 
+      - name: Debug: cargo metadata & dependency tree
+        run: |
+          echo "RUSTC:" && rustc --version || true
+          echo "CARGO:" && cargo --version || true
+          echo "\n=== cargo metadata (top-level) ==="
+          cargo metadata --no-deps --format-version 1 || true
+          echo "\n=== cargo tree (dependencies, depth=2) ==="
+          cargo tree --edges normal --depth 2 || true
+
       - name: Build
         run: cargo build --workspace --verbose
       - name: Run Rust tests
