@@ -1,5 +1,5 @@
 use aes_gcm::{Aes256Gcm, Key, Nonce}; // Or `AesGcm`
-use aes_gcm::aead::{Aead, NewAead};
+use aes_gcm::aead::Aead;
 use argon2::{Argon2, password_hash::{SaltString, PasswordHasher, PasswordVerifier}, PasswordHash, PasswordHasher as _};
 use rand::rngs::OsRng;
 use rand::RngCore;
