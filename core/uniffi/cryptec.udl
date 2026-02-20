@@ -1,0 +1,8 @@
+namespace cryptec {
+
+    string generate_mnemonic(in uint32 strength);
+    string first_receive_address(in string mnemonic);
+    string create_psbt(in string mnemonic, in string to_address, in uint64 satoshis);
+    string sign_psbt(in string mnemonic, in string psbt_b64);
+
+}

@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>CrypteCipher Desktop</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data:;" />
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin: 0; padding: 20px; }
+      .container { max-width: 820px; margin: 0 auto; }
+      .addr { background: #f6f6f6; padding: 12px; border-radius: 6px; font-family: monospace; }
+      .section { margin-top: 18px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>CrypteCipher — Desktop (Electron)</h1>
+      <div>
+        <button id="new">Create / Generate mnemonic</button>
+        <button id="addr">Get first receive address</button>
+      </div>
+      <div class="section">
+        <h3>Mnemonic</h3>
+        <div id="mn" class="addr">(none)</div>
+      </div>
+      <div class="section">
+        <h3>Receive Address</h3>
+        <div id="addrbox" class="addr">(none)</div>
+      </div>
+      <div class="section">
+        <h3>Send (mock)</h3>
+        <input id="to" placeholder="to address" style="width:60%" />
+        <input id="sats" placeholder="satoshis" style="width:20%" />
+        <button id="psbt">Create PSBT</button>
+      </div>
+      <pre id="out"></pre>
+    </div>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "cryptec-electron",
+  "version": "0.1.0",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node ./test/electron-smoke.js"
+  },
+  "devDependencies": {
+    "electron": "^25.0.0"
+  }
+}

@@ -2,11 +2,13 @@ use bdk::Wallet;
 use bdk::database::{MemoryDatabase, SqliteDatabase};
 use bdk::wallet::AddressIndex;
 use bdk::blockchain::{noop_progress::NoopProgress, ElectrumBlockchain, ElectrumBlockchainConfig};
-use bdk::keys::bip39::{Mnemonic as BdkMnemonic};
+use crate::bip39::Mnemonic as LocalMnemonic;
 use bdk::descriptor::DescriptorTemplateOut;
+use bitcoin::util::bip32::ExtendedPubKey;
 use bitcoin::Network;
 use anyhow::Result;
 use std::path::Path;
+use bitcoin::consensus::encode as consensus_encode;
 
 /// Minimal BDK wallet scaffold with Electrum support (in-memory)
 pub struct BdkWallet {
@@ -16,14 +18,14 @@ pub struct BdkWallet {
 impl BdkWallet {
     /// Create a new BDK wallet from a BIP39 mnemonic (and passphrase) for the specified network
     pub fn new_from_mnemonic(phrase: &str, passphrase: &str, network: Network) -> Result<Self> {
-        // Use BDK's bip39 helper to create descriptor templates
-        let mnemonic = BdkMnemonic::from_str(phrase).map_err(|e| anyhow::anyhow!(e.to_string()))?;
-        let xkey: DescriptorTemplateOut = bdk::keys::bip39::translate_mnemonic(&mnemonic, passphrase, network)
-            .map_err(|e| anyhow::anyhow!(e.to_string()))?;
-
-        // For demo, use the first "external" descriptor for a single-key wallet
-        let descriptor = xkey.external.clone();
-        let change_descriptor = xkey.internal.clone();
+        // Derive master xprv using our local bip39 helper and build simple `wpkh(<xpub>/0/*)` descriptors.
+        let local_m = LocalMnemonic::from_phrase(phrase).map_err(|e| anyhow::anyhow!(e.to_string()))?;
+        let xprv = local_m.to_master_xprv(passphrase, network);
+        // neuter to xpub for descriptor
+        let secp = secp256k1::Secp256k1::new();
+        let xpub = ExtendedPubKey::from_private(&secp, &xprv);
+        let descriptor = format!("wpkh({}/0/*)", xpub.to_string());
+        let change_descriptor = format!("wpkh({}/1/*)", xpub.to_string());
 
         let wallet = Wallet::new_offline(&descriptor, Some(&change_descriptor), network, MemoryDatabase::default())?;
         Ok(Self { wallet })
@@ -49,7 +51,8 @@ impl BdkWallet {
         let mut builder = bdk::TxBuilder::new();
         builder = builder.add_recipient(addr.script_pubkey(), satoshis);
         let (psbt, _details) = self.wallet.build_tx(builder)?;
-        let bs = base64::encode(&psbt.serialize());
+        let serialized = consensus_encode::serialize(&psbt);
+        let bs = base64::encode(&serialized);
         Ok(bs)
     }
 
@@ -58,7 +61,8 @@ impl BdkWallet {
         let raw = base64::decode(psbt_b64)?;
         let mut psbt: bitcoin::util::psbt::PartiallySignedTransaction = bitcoin::consensus::deserialize(&raw)?;
         self.wallet.sign(&mut psbt, bdk::SignOptions::default())?;
-        let out = base64::encode(&psbt.serialize());
+        let serialized = consensus_encode::serialize(&psbt);
+        let out = base64::encode(&serialized);
         Ok(out)
     }
 
@@ -78,12 +82,13 @@ impl PersistentBdkWallet {
     /// Create or open a persistent wallet using a SQLite DB file at `db_path`.
     /// `db_path` should be a filesystem path like `/path/to/wallet.db`.
     pub fn new_from_mnemonic_sqlite(phrase: &str, passphrase: &str, network: Network, db_path: &str) -> Result<Self> {
-        let mnemonic = BdkMnemonic::from_str(phrase).map_err(|e| anyhow::anyhow!(e.to_string()))?;
-        let xkey: DescriptorTemplateOut = bdk::keys::bip39::translate_mnemonic(&mnemonic, passphrase, network)
-            .map_err(|e| anyhow::anyhow!(e.to_string()))?;
-
-        let descriptor = xkey.external.clone();
-        let change_descriptor = xkey.internal.clone();
+        // derive master xprv & descriptors just like in BdkWallet
+        let local_m = LocalMnemonic::from_phrase(phrase).map_err(|e| anyhow::anyhow!(e.to_string()))?;
+        let xprv = local_m.to_master_xprv(passphrase, network);
+        let secp = secp256k1::Secp256k1::new();
+        let xpub = ExtendedPubKey::from_private(&secp, &xprv);
+        let descriptor = format!("wpkh({}/0/*)", xpub.to_string());
+        let change_descriptor = format!("wpkh({}/1/*)", xpub.to_string());
 
         // Ensure directory exists
         let p = Path::new(db_path);
@@ -116,7 +121,8 @@ impl PersistentBdkWallet {
         let mut builder = bdk::TxBuilder::new();
         builder = builder.add_recipient(addr.script_pubkey(), satoshis);
         let (psbt, _details) = self.wallet.build_tx(builder)?;
-        let bs = base64::encode(&psbt.serialize());
+        let serialized = consensus_encode::serialize(&psbt);
+        let bs = base64::encode(&serialized);
         Ok(bs)
     }
 
@@ -124,7 +130,8 @@ impl PersistentBdkWallet {
         let raw = base64::decode(psbt_b64)?;
         let mut psbt: bitcoin::util::psbt::PartiallySignedTransaction = bitcoin::consensus::deserialize(&raw)?;
         self.wallet.sign(&mut psbt, bdk::SignOptions::default())?;
-        let out = base64::encode(&psbt.serialize());
+        let serialized = consensus_encode::serialize(&psbt);
+        let out = base64::encode(&serialized);
         Ok(out)
     }
 
@@ -195,6 +202,7 @@ impl PersistentBdkWallet {
         let _ = crate::keystore::secure_delete(&tmp_path);
         Ok(())
     }
+}
 
 /// Temporary decrypted DB handle. When dropped, it securely deletes the underlying file.
 pub struct DecryptedDb {
