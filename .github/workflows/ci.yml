@@ -42,43 +42,56 @@ jobs:
       - name: Debug: pkg-config & libusb (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          echo "=== PKG_CONFIG & libusb diagnostic ==="
-          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
-          which pkg-config || true
-          pkg-config --version || true
-          pkg-config --modversion libusb-1.0 || true
-          pkg-config --cflags --libs libusb-1.0 || true
-          echo "\nFiles under /usr/lib*/pkgconfig (matching libusb)"
-          ls -la /usr/lib*/pkgconfig | grep libusb || true
-          echo "\nList files from libusb-dev package (first 50 lines):"
-          dpkg -L libusb-1.0-0-dev | head -n 50 || true
-          echo "\nldconfig output for libusb (if available):"
-          ldconfig -p | grep libusb || true
+          mkdir -p ci-diagnostics
+          echo "=== PKG_CONFIG & libusb diagnostic ===" | tee ci-diagnostics/pkgconfig-ubuntu.txt
+          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH" | tee -a ci-diagnostics/pkgconfig-ubuntu.txt
+          which pkg-config || true | tee -a ci-diagnostics/pkgconfig-ubuntu.txt
+          pkg-config --version || true | tee -a ci-diagnostics/pkgconfig-ubuntu.txt
+          pkg-config --modversion libusb-1.0 || true | tee -a ci-diagnostics/pkgconfig-ubuntu.txt
+          pkg-config --cflags --libs libusb-1.0 || true | tee -a ci-diagnostics/pkgconfig-ubuntu.txt
+          echo "\nFiles under /usr/lib*/pkgconfig (matching libusb)" | tee -a ci-diagnostics/pkgconfig-ubuntu.txt
+          ls -la /usr/lib*/pkgconfig | grep libusb || true | tee -a ci-diagnostics/pkgconfig-ubuntu.txt
+          echo "\nList files from libusb-dev package (first 50 lines):" | tee -a ci-diagnostics/pkgconfig-ubuntu.txt
+          dpkg -L libusb-1.0-0-dev | head -n 50 || true | tee -a ci-diagnostics/pkgconfig-ubuntu.txt
+          echo "\nldconfig output for libusb (if available):" | tee -a ci-diagnostics/pkgconfig-ubuntu.txt
+          ldconfig -p | grep libusb || true | tee -a ci-diagnostics/pkgconfig-ubuntu.txt
 
       - name: Debug: pkg-config & libusb (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          echo "=== PKG_CONFIG & libusb diagnostic (macOS) ==="
-          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
-          which pkg-config || true
-          pkg-config --version || true
-          pkg-config --modversion libusb-1.0 || true
-          ls -la /opt/homebrew/lib/pkgconfig /usr/local/lib/pkgconfig || true
-          brew list --versions libusb || true
+          mkdir -p ci-diagnostics
+          echo "=== PKG_CONFIG & libusb diagnostic (macOS) ===" | tee ci-diagnostics/pkgconfig-macos.txt
+          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH" | tee -a ci-diagnostics/pkgconfig-macos.txt
+          which pkg-config || true | tee -a ci-diagnostics/pkgconfig-macos.txt
+          pkg-config --version || true | tee -a ci-diagnostics/pkgconfig-macos.txt
+          pkg-config --modversion libusb-1.0 || true | tee -a ci-diagnostics/pkgconfig-macos.txt
+          ls -la /opt/homebrew/lib/pkgconfig /usr/local/lib/pkgconfig || true | tee -a ci-diagnostics/pkgconfig-macos.txt
+          brew list --versions libusb || true | tee -a ci-diagnostics/pkgconfig-macos.txt
 
       - name: Debug: Cargo.lock (key deps)
         run: |
-          echo "=== Cargo.lock entries for key crates ==="
-          grep -nE 'bdk|bip39|bip32|bitcoin|rusqlite|hidapi|aes-gcm|rusqlite' Cargo.lock || true
+          mkdir -p ci-diagnostics
+          echo "=== Cargo.lock entries for key crates ===" > ci-diagnostics/cargo-lock-entries.txt
+          grep -nE 'bdk|bip39|bip32|bitcoin|rusqlite|hidapi|aes-gcm|rusqlite' Cargo.lock >> ci-diagnostics/cargo-lock-entries.txt || true
 
       - name: Debug: cargo metadata & dependency tree
         run: |
-          echo "RUSTC:" && rustc --version || true
-          echo "CARGO:" && cargo --version || true
-          echo "\n=== cargo metadata (top-level) ==="
-          cargo metadata --no-deps --format-version 1 || true
-          echo "\n=== cargo tree (dependencies, depth=2) ==="
-          cargo tree --edges normal --depth 2 || true
+          mkdir -p ci-diagnostics
+          echo "RUSTC:" > ci-diagnostics/cargo-metadata.txt
+          rustc --version >> ci-diagnostics/cargo-metadata.txt || true
+          echo "CARGO:" >> ci-diagnostics/cargo-metadata.txt
+          cargo --version >> ci-diagnostics/cargo-metadata.txt || true
+          echo "\n=== cargo metadata (top-level) ===" >> ci-diagnostics/cargo-metadata.txt
+          cargo metadata --no-deps --format-version 1 >> ci-diagnostics/cargo-metadata.txt || true
+          echo "\n=== cargo tree (dependencies, depth=2) ===" >> ci-diagnostics/cargo-metadata.txt
+          cargo tree --edges normal --depth 2 >> ci-diagnostics/cargo-metadata.txt || true
+
+      - name: Upload CI diagnostics (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cryptec-ci-diagnostics
+          path: ci-diagnostics/**
 
       - name: Build
         run: cargo build --workspace --verbose
