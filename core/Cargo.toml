@@ -38,6 +38,12 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 hidapi = "1.3"
 
+# Direct runtime/test dependencies used by core
+rusqlite = "0.29"
+tempfile = "3.6"
+uuid = { version = "1.4", features = ["v4"] }
+lazy_static = "1.4"
+
 # Monero (RPC client)
 reqwest = { version = "0.11", features = ["blocking", "json", "rustls-tls"] }
 monero = "0.18"
