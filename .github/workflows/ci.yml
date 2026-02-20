@@ -86,6 +86,21 @@ jobs:
           echo "\n=== cargo tree (dependencies, depth=2) ===" >> ci-diagnostics/cargo-metadata.txt
           cargo tree --edges normal --depth 2 >> ci-diagnostics/cargo-metadata.txt || true
 
+      - name: CI: generate Cargo.lock (for debugging)
+        run: |
+          mkdir -p ci-diagnostics
+          echo "=== Generating Cargo.lock (CI) ===" > ci-diagnostics/Cargo.lock.txt
+          cargo generate-lockfile --verbose >> ci-diagnostics/Cargo.lock.txt 2>&1 || true
+          if [ -f Cargo.lock ]; then echo "--- Cargo.lock (head) ---" >> ci-diagnostics/Cargo.lock.txt && head -n 200 Cargo.lock >> ci-diagnostics/Cargo.lock.txt || true; fi
+
+      - name: Build & test `core` crate only
+        run: |
+          mkdir -p ci-diagnostics
+          echo "=== cargo build -p cryptec_core ===" > ci-diagnostics/core-build.txt
+          cargo build -p cryptec_core --verbose >> ci-diagnostics/core-build.txt 2>&1 || true
+          echo "=== cargo test -p cryptec_core ===" >> ci-diagnostics/core-build.txt
+          cargo test -p cryptec_core --verbose >> ci-diagnostics/core-build.txt 2>&1 || true
+
       - name: Upload CI diagnostics (always)
         if: always()
         uses: actions/upload-artifact@v4
