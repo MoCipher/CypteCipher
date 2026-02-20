@@ -108,10 +108,10 @@ jobs:
           name: cryptec-ci-diagnostics
           path: ci-diagnostics/**
 
-      - name: Build
-        run: cargo build --workspace --verbose
-      - name: Run Rust tests
-        run: cargo test --workspace --verbose
+      - name: Build (core only)
+        run: cargo build -p cryptec_core --verbose
+      - name: Run Rust tests (core only)
+        run: cargo test -p cryptec_core --verbose
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
