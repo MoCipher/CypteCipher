@@ -195,6 +195,7 @@ impl PersistentBdkWallet {
         let _ = crate::keystore::secure_delete(&tmp_path);
         Ok(())
     }
+}
 
 /// Temporary decrypted DB handle. When dropped, it securely deletes the underlying file.
 pub struct DecryptedDb {
