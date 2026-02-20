@@ -36,7 +36,11 @@ keyring = "1.0"
 anyhow = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-hidapi = "1.3"
+hidapi = { version = "1.3", optional = true }
+
+[features]
+# Enable hardware wallet / HID support (requires system libusb)
+hw-wallet = ["hidapi"]
 
 # Direct runtime/test dependencies used by core
 rusqlite = "0.29"
