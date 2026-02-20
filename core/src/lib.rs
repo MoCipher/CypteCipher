@@ -30,6 +30,9 @@ pub use swap_manager::SwapOffer;
 pub use swap_sim::SwapSimulation;
 pub use wallet_manager::{register_decrypted_db, close_decrypted_db, register_inmemory_db, close_inmemory_db, close_all, list_handles};
 
+mod uniffi;
+pub use uniffi::{generate_mnemonic, first_receive_address, create_psbt, sign_psbt};
+
 /// WalletCore: minimal demonstrative API
 pub struct WalletCore {
     // In a real implementation, secrets should be stored in a secure enclave or encrypted storage
