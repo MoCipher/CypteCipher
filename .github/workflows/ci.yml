@@ -124,3 +124,10 @@ jobs:
           npm ci || true
           npm test
         shell: bash
+
+      - name: Run mobile unit tests (React Native)
+        working-directory: ./mobile
+        run: |
+          npm ci || true
+          npm test
+        shell: bash
